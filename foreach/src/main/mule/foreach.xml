@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="456098f3-6603-4bb6-8d0c-bae320dfb690" >
+		<http:listener-connection host="localhost" port="8087" readTimeout="3000" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="c8415c9e-beb6-4294-bf7c-742892900c06" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="PHW#84#jeor" database="abhidb" />
+	</db:config>
+	<flow name="foreachFlow" doc:id="2ca11fb7-c2d4-4865-af64-c9f20962ce69" >
+		<http:listener doc:name="Listener" doc:id="b13b0a89-bd20-4fbd-9878-9feba2e221d3" path="foreach" config-ref="HTTP_Listener_config"/>
+		<ee:transform doc:name="Transform Message" doc:id="92276f5f-106d-4f26-a7a6-bfaf6c6e3c78" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+1 to 100 map
+
+{
+	id: if ( $$ == 4) "abc" else 0 + $$,
+	name: "samm",
+	number: 56789,
+	lname: "reddy"
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<parallel-foreach doc:name="Parallel For Each" doc:id="5e58f36e-0040-4827-bee8-b0acd5be444a">
+			<logger level="INFO" doc:name="Logger" doc:id="59acb739-b7a1-470c-a88d-8649b3b632bb" message="#[payload]" />
+			<db:insert doc:name="Insert" doc:id="bfbb9cc2-2761-498a-9c9e-f40060a81baa" config-ref="Database_Config">
+				<db:sql><![CDATA[INSERT INTO abhidb (id, name, number, lname)
+VALUES (:id,:name,:number,:lname);]]></db:sql>
+				<db:input-parameters><![CDATA[#[payload]]]></db:input-parameters>
+			</db:insert>
+			</parallel-foreach>
+	</flow>
+</mule>
