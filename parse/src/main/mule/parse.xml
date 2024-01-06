@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7d037833-7fab-4053-a022-ebaaea5f5654" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="adb1a52f-c12d-4926-a227-4b1a57908f36" >
+		<vm:queues >
+			<vm:queue queueName="new que" />
+		</vm:queues>
+	</vm:config>
+	<flow name="parseFlow3" doc:id="5627402f-7c6c-4c48-a9e8-9511d5777e4c" >
+		<http:listener doc:name="Listener" doc:id="1a2335a1-c4be-418b-a641-00b39014b73b" config-ref="HTTP_Listener_config" path="public consume"/>
+		<vm:publish-consume queueName="new que" doc:name="Publish consume" doc:id="3234b9d5-73aa-45ae-9774-b92e3a6984e3" config-ref="VM_Config" timeout="10"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ba20bf69-18a4-45ea-8946-43980fb59ddf" message="#[payload]"/>
+	</flow>
+	<flow name="parseFlow2" doc:id="de765cd5-9670-4f0f-9798-24a87fb92385" >
+		<http:listener doc:name="Listener" doc:id="f18a317a-1249-4eaa-a4aa-795afc0e6dbe" config-ref="HTTP_Listener_config" path="consume"/>
+		<vm:consume queueName="new que" doc:name="Consume" doc:id="8721f7aa-1c6a-4564-9f12-a71c544a8268" config-ref="VM_Config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="970bbe2b-1999-4c26-94fd-b0e4edf59238" message="#[payload]"/>
+	</flow>
+	<flow name="parseFlow1" doc:id="ba3a892a-b36e-4e8b-8215-03c0c2909f2c" initialState="stopped">
+		<vm:listener queueName="new que" doc:name="Listener" doc:id="0ede6e35-4df8-4fb6-8ab4-164094c7eac0" config-ref="VM_Config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="703df6e3-ab46-45b9-a2aa-505d6b688935" message="#[payload]"/>
+	</flow>
+	<flow name="parseFlow" doc:id="9046d0ea-eede-4fe2-8eec-2c4cf45df7b9" >
+		<http:listener doc:name="Listener" doc:id="8ce9569b-2a9a-4135-80b1-d1a26d1182fb" config-ref="HTTP_Listener_config" path="parse"/>
+		<vm:publish queueName="new que" doc:id="b22d0a91-3723-4385-bef5-578e1f7493f1" config-ref="VM_Config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="e81ce08e-22b5-47f2-b45d-1160aae92107" message="#[payload]"/>
+	</flow>
+</mule>
